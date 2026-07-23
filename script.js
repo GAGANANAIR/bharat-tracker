@@ -116,22 +116,35 @@ document.getElementById('fuelKeySave').addEventListener('click', () => {
   fuelResult.textContent = 'Key saved in this browser. (Wire up the specific data.gov.in resource ID for your state/city to complete this integration — the free key alone doesn\'t pick the endpoint for you.)';
 });
 
+// === TRAIN STATUS (Improved) ===
 document.getElementById('pnrBtn').addEventListener('click', () => {
   const pnr = document.getElementById('pnrInput').value.trim();
-  if (!/^\d{10}$/.test(pnr)){
+  if (!/^\d{10}$/.test(pnr)) {
     alert('Please enter a valid 10-digit PNR number.');
     return;
   }
-  window.open('https://www.indianrail.gov.in/enquiry/PNR/PnrEnquiry.html', '_blank');
+  // Pre-fills PNR on official site
+  window.open(`https://www.indianrail.gov.in/enquiry/PNR/PnrEnquiry.html?pnr=${pnr}`, '_blank');
+});
+
+// === TRAIN STATUS (Improved) ===
+document.getElementById('pnrBtn').addEventListener('click', () => {
+  const pnr = document.getElementById('pnrInput').value.trim();
+  if (!/^\d{10}$/.test(pnr)) {
+    alert('Please enter a valid 10-digit PNR number.');
+    return;
+  }
+  // Pre-fills PNR on official site
+  window.open(`https://www.indianrail.gov.in/enquiry/PNR/PnrEnquiry.html?pnr=${pnr}`, '_blank');
 });
 
 document.getElementById('trainBtn').addEventListener('click', () => {
   const train = document.getElementById('trainInput').value.trim();
-  if (!/^\d{4,5}$/.test(train)){
-    alert('Please enter a valid train number (4-5 digits).');
+  if (!/^\d{4,5}$/.test(train)) {
+    alert('Please enter a valid train number (4 or 5 digits).');
     return;
   }
-  window.open('https://enquiry.indianrail.gov.in/ntes/', '_blank');
+  window.open(`https://enquiry.indianrail.gov.in/ntes/RunningTrain?trainNo=${train}`, '_blank');
 });
 
 let leafletMap = null;
