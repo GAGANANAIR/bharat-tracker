@@ -1,6 +1,3 @@
-// ---------------------------------------------------------------------
-// Tab switching
-// ---------------------------------------------------------------------
 const tabBtns = document.querySelectorAll('.tab-btn');
 const panels = {
   schemes: document.getElementById('tab-schemes'),
@@ -17,14 +14,11 @@ tabBtns.forEach(btn => {
   });
 });
 
-// ---------------------------------------------------------------------
-// Government Schemes: search + category filter over the static SCHEMES list
-// ---------------------------------------------------------------------
 const schemeSearch = document.getElementById('schemeSearch');
 const schemeCategory = document.getElementById('schemeCategory');
 const schemeResults = document.getElementById('schemeResults');
 
-// Populate category dropdown from the data itself
+
 const categories = [...new Set(SCHEMES.map(s => s.category))].sort();
 categories.forEach(cat => {
   const opt = document.createElement('option');
@@ -67,11 +61,6 @@ schemeSearch.addEventListener('input', renderSchemes);
 schemeCategory.addEventListener('change', renderSchemes);
 renderSchemes();
 
-// ---------------------------------------------------------------------
-// Live Prices: gold-api.com (free, no key) for XAU/XAG spot price in USD,
-// converted to INR via open.er-api.com (free, no key) exchange rate.
-// Troy ounce -> grams: 1 oz = 31.1035 g
-// ---------------------------------------------------------------------
 const OZ_TO_G = 31.1035;
 
 async function fetchLivePrices(){
@@ -81,9 +70,9 @@ async function fetchLivePrices(){
       fetch('https://api.gold-api.com/price/XAG'),
       fetch('https://open.er-api.com/v6/latest/USD')
     ]);
-    const gold = await goldRes.json();   // { price: <USD per oz> }
+    const gold = await goldRes.json();  
     const silver = await silverRes.json();
-    const fx = await fxRes.json();       // { rates: { INR: ... } }
+    const fx = await fxRes.json();       
 
     const usdToInr = fx.rates.INR;
     const goldPerGramUsd = gold.price / OZ_TO_G;
@@ -107,16 +96,11 @@ async function fetchLivePrices(){
   }
 }
 fetchLivePrices();
-setInterval(fetchLivePrices, 60000); // refresh every minute
+setInterval(fetchLivePrices, 60000); 
 
-// ---------------------------------------------------------------------
-// Fuel prices: no free keyless public API exists, so this is a
-// bring-your-own-key integration point (data.gov.in).
-// ---------------------------------------------------------------------
 const fuelApiKeyInput = document.getElementById('fuelApiKey');
 const fuelResult = document.getElementById('fuelResult');
 
-// Restore a previously saved key, if any
 try {
   const saved = localStorage.getItem('bharatTracker_fuelApiKey');
   if (saved) fuelApiKeyInput.value = saved;
@@ -132,10 +116,6 @@ document.getElementById('fuelKeySave').addEventListener('click', () => {
   fuelResult.textContent = 'Key saved in this browser. (Wire up the specific data.gov.in resource ID for your state/city to complete this integration — the free key alone doesn\'t pick the endpoint for you.)';
 });
 
-// ---------------------------------------------------------------------
-// Train status: no reliable free keyless API, so we deep-link to the
-// official government tools with the number pre-filled where possible.
-// ---------------------------------------------------------------------
 document.getElementById('pnrBtn').addEventListener('click', () => {
   const pnr = document.getElementById('pnrInput').value.trim();
   if (!/^\d{10}$/.test(pnr)){
@@ -154,11 +134,6 @@ document.getElementById('trainBtn').addEventListener('click', () => {
   window.open('https://enquiry.indianrail.gov.in/ntes/', '_blank');
 });
 
-// ---------------------------------------------------------------------
-// Nearby Map: Leaflet + OpenStreetMap tiles (free) + Overpass API (free,
-// no key) for fuel stations, hospitals, and railway stations near the
-// user's browser-reported location.
-// ---------------------------------------------------------------------
 let leafletMap = null;
 let mapMarkers = [];
 let userLat = 20.5937, userLon = 78.9629; // fallback: center of India
@@ -234,7 +209,7 @@ async function loadNearby(type){
           continue;
         }
         data = await res.json();
-        break; // success, stop trying further mirrors
+        break; 
       } catch (err){
         lastError = `${url} → ${err.message}`;
       }
@@ -250,8 +225,6 @@ async function loadNearby(type){
       return;
     }
 
-    // Sort by actual distance from the user, closest first, and cap the
-    // markers shown so the map stays readable.
     const withDist = data.elements
       .filter(el => el.lat !== undefined)
       .map(el => ({ el, dist: haversineKm(userLat, userLon, el.lat, el.lon) }))
