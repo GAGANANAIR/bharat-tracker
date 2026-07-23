@@ -1,3 +1,4 @@
+// === TAB SWITCHING ===
 const tabBtns = document.querySelectorAll('.tab-btn');
 const panels = {
   schemes: document.getElementById('tab-schemes'),
@@ -7,19 +8,24 @@ const panels = {
 };
 tabBtns.forEach(btn => {
   btn.addEventListener('click', () => {
+    const target = panels[btn.dataset.tab];
+    if (!target) {
+      console.warn(`No panel found for tab "${btn.dataset.tab}" — check data-tab matches an id in panels{}`);
+      return;
+    }
     tabBtns.forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     Object.values(panels).forEach(p => p.classList.add('hidden'));
-    panels[btn.dataset.tab].classList.remove('hidden');
+    target.classList.remove('hidden');
   });
 });
 
+// === SCHEMES ===
 const schemeSearch = document.getElementById('schemeSearch');
 const schemeCategory = document.getElementById('schemeCategory');
 const schemeResults = document.getElementById('schemeResults');
-const trainResult = document.getElementById('trainResult');   // ← Important
+const trainResult = document.getElementById('trainResult');
 
-// Schemes Code (unchanged)
 const categories = [...new Set(SCHEMES.map(s => s.category))].sort();
 categories.forEach(cat => {
   const opt = document.createElement('option');
@@ -28,7 +34,7 @@ categories.forEach(cat => {
   schemeCategory.appendChild(opt);
 });
 
-function renderSchemes(){
+function renderSchemes() {
   const q = schemeSearch.value.trim().toLowerCase();
   const cat = schemeCategory.value;
   const filtered = SCHEMES.filter(s => {
@@ -39,7 +45,7 @@ function renderSchemes(){
     return matchesQ && matchesCat;
   });
   schemeResults.innerHTML = '';
-  if (filtered.length === 0){
+  if (filtered.length === 0) {
     schemeResults.innerHTML = '<p style="color:#888">No schemes match your search.</p>';
     return;
   }
@@ -52,7 +58,7 @@ function renderSchemes(){
       <p><b>Who it's for:</b> ${s.who}</p>
       <p><b>Benefit:</b> ${s.benefit}</p>
       <p><b>How to apply:</b> ${s.how}</p>
-      <a href="${s.link}" target="_blank">Official page →</a>
+      <a href="${s.link}" target="_blank" rel="noopener noreferrer">Official page →</a>
     `;
     schemeResults.appendChild(card);
   });
@@ -61,63 +67,95 @@ schemeSearch.addEventListener('input', renderSchemes);
 schemeCategory.addEventListener('change', renderSchemes);
 renderSchemes();
 
-// Prices Code (unchanged)
+// === LIVE GOLD/SILVER PRICES ===
 const OZ_TO_G = 31.1035;
-async function fetchLivePrices(){ ... }   // your existing prices code
+const goldPriceEl = document.getElementById('goldPrice');
+const silverPriceEl = document.getElementById('silverPrice');
+const pricesStatusEl = document.getElementById('pricesStatus');
+
+async function fetchLivePrices() {
+  if (pricesStatusEl) pricesStatusEl.textContent = 'Updating prices…';
+  try {
+    const [goldRes, silverRes, fxRes] = await Promise.all([
+      fetch('https://api.gold-api.com/price/XAU'),
+      fetch('https://api.gold-api.com/price/XAG'),
+      fetch('https://open.er-api.com/v6/latest/USD')
+    ]);
+
+    if (!goldRes.ok || !silverRes.ok || !fxRes.ok) {
+      throw new Error('One or more price APIs returned a non-OK response');
+    }
+
+    const gold = await goldRes.json();
+    const silver = await silverRes.json();
+    const fx = await fxRes.json();
+
+    const usdToInr = fx.rates && fx.rates.INR;
+    if (!usdToInr) throw new Error('INR rate missing from FX response');
+
+    const goldPerGramInr = (gold.price / OZ_TO_G) * usdToInr;
+    const silverPerGramInr = (silver.price / OZ_TO_G) * usdToInr;
+
+    if (goldPriceEl) goldPriceEl.textContent = `₹${goldPerGramInr.toFixed(2)} / g`;
+    if (silverPriceEl) silverPriceEl.textContent = `₹${silverPerGramInr.toFixed(2)} / g`;
+    if (pricesStatusEl) pricesStatusEl.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
+  } catch (err) {
+    console.error('fetchLivePrices failed:', err);
+    if (pricesStatusEl) pricesStatusEl.textContent = 'Live prices unavailable right now — please retry shortly.';
+  }
+}
 fetchLivePrices();
 setInterval(fetchLivePrices, 60000);
 
-// Fuel Code (unchanged)
+// === FUEL PRICES ===
 const fuelApiKeyInput = document.getElementById('fuelApiKey');
 const fuelResult = document.getElementById('fuelResult');
-// ... your fuel code
+const fuelBtn = document.getElementById('fuelBtn');
 
-// === PNR CHECKER ===
-async function checkPNR(pnr) {
-  trainResult.style.display = 'block';
-  trainResult.innerHTML = '<p style="color:#0066cc;">Checking PNR with RapidAPI...</p>';
-
-  try {
-    const response = await fetch(`https://irctc1.p.rapidapi.com/api/v3/getPNR?pnrNumber=${pnr}`, {
-      method: 'GET',
-      headers: {
-        'x-rapidapi-host': 'irctc1.p.rapidapi.com',
-        'x-rapidapi-key': '31f5e7752amsh62837c45a6eaf9bp19ce77jsnd063cd71a424'
-      }
-    });
-
-    const data = await response.json();
-
-    if (data && data.data) {
-      const d = data.data;
-      let html = `<h3>PNR: ${pnr}</h3>`;
-      html += `<p><strong>Train:</strong> ${d.trainName || d.trainNo || 'N/A'}</p>`;
-      html += `<p><strong>DoJ:</strong> ${d.doj || 'N/A'}</p>`;
-      html += `<p><strong>Chart Status:</strong> ${d.chartPrepared ? '✅ Prepared' : 'Not Prepared'}</p>`;
-
-      if (d.passengerInfo && d.passengerInfo.length > 0) {
-        html += '<h4>Passengers:</h4><ul>';
-        d.passengerInfo.forEach((p, i) => {
-          html += `<li>Passenger ${i+1}: ${p.currentStatus || p.bookingStatus || 'N/A'}</li>`;
-        });
-        html += '</ul>';
-      }
-      trainResult.innerHTML = html;
-    } else {
-      throw new Error('No data');
+if (fuelBtn) {
+  fuelBtn.addEventListener('click', async () => {
+    const key = fuelApiKeyInput ? fuelApiKeyInput.value.trim() : '';
+    if (!key) {
+      fuelResult.innerHTML = '<p style="color:#d32f2f;">Please paste your free data.gov.in API key first.</p>';
+      return;
     }
-  } catch (err) {
-    trainResult.innerHTML = `
-      <p style="color:#d32f2f;">Live PNR data not available right now (API limit or temporary issue).</p>
-      <p><strong>Your PNR is ready. Click below to see full details:</strong></p>
-      <button onclick="window.open('https://www.indianrail.gov.in/enquiry/PNR/PnrEnquiry.html?pnr=${pnr}', '_blank')" style="padding:10px 20px; background:#0066cc; color:white; border:none; border-radius:6px; cursor:pointer;">
-        Open Official PNR Page →
-      </button>
-    `;
-  }
+    fuelResult.innerHTML = '<p style="color:#0066cc;">Fetching fuel prices…</p>';
+    try {
+      const resourceId = 'REPLACE_WITH_DATA_GOV_IN_RESOURCE_ID';
+      const response = await fetch(
+        `https://api.data.gov.in/resource/${resourceId}?api-key=${encodeURIComponent(key)}&format=json&limit=10`
+      );
+      if (!response.ok) throw new Error(`API responded with ${response.status}`);
+      const data = await response.json();
+      if (!data.records || data.records.length === 0) throw new Error('No records returned');
+
+      let html = '<h4>Fuel Prices</h4><ul>';
+      data.records.forEach(r => {
+        html += `<li>${r.state || r.district || 'Unknown'}: ${r.price || 'N/A'}</li>`;
+      });
+      html += '</ul>';
+      fuelResult.innerHTML = html;
+    } catch (err) {
+      console.error('Fuel price fetch failed:', err);
+      fuelResult.innerHTML = '<p style="color:#d32f2f;">Could not fetch fuel prices. Check your API key and try again.</p>';
+    }
+  });
 }
 
-// Button Listeners
+// === TRAIN STATUS ===
+function checkPNR(pnr) {
+  trainResult.style.display = 'block';
+  trainResult.innerHTML = `
+    <p><strong>PNR ${pnr} is ready to check.</strong></p>
+    <button id="openPnrBtn" style="padding:10px 20px; background:#0066cc; color:white; border:none; border-radius:6px; cursor:pointer;">
+      Open Official PNR Page →
+    </button>
+  `;
+  document.getElementById('openPnrBtn').addEventListener('click', () => {
+    window.open(`https://www.indianrail.gov.in/enquiry/PNR/PnrEnquiry.html?pnr=${encodeURIComponent(pnr)}`, '_blank', 'noopener,noreferrer');
+  });
+}
+
 document.getElementById('pnrBtn').addEventListener('click', () => {
   const pnr = document.getElementById('pnrInput').value.trim();
   if (!/^\d{10}$/.test(pnr)) {
@@ -133,7 +171,5 @@ document.getElementById('trainBtn').addEventListener('click', () => {
     alert('Please enter a valid train number.');
     return;
   }
-  window.open(`https://enquiry.indianrail.gov.in/ntes/RunningTrain?trainNo=${train}`, '_blank');
+  window.open(`https://enquiry.indianrail.gov.in/ntes/RunningTrain?trainNo=${encodeURIComponent(train)}`, '_blank', 'noopener,noreferrer');
 });
-
-// Rest of your map code (unchanged)
