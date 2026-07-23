@@ -198,12 +198,34 @@ async function loadNearby(type){
   mapMarkers = [];
 
   const query = `[out:json][timeout:25];${OVERPASS_QUERY[type]}(around:20000,${userLat},${userLon});out body 300;`;
+  const endpoints = [
+    'https://overpass-api.de/api/interpreter',
+    'https://overpass.kumi.systems/api/interpreter',
+    'https://overpass.openstreetmap.ru/api/interpreter'
+  ];
+
+  let data = null;
+  let lastError = '';
+  for (const url of endpoints){
+    try {
+      const res = await fetch(url, { method: 'POST', body: query });
+      if (!res.ok){
+        lastError = `${url} → HTTP ${res.status}`;
+        continue;
+      }
+      data = await res.json();
+      break; // success, stop trying further mirrors
+    } catch (err){
+      lastError = `${url} → ${err.message}`;
+    }
+  }
+
+  if (!data){
+    document.getElementById('mapStatus').textContent = `Could not reach any Overpass server. Last error: ${lastError}. This is usually temporary — try again in a moment.`;
+    return;
+  }
+
   try {
-    const res = await fetch('https://overpass-api.de/api/interpreter', {
-      method: 'POST',
-      body: query
-    });
-    const data = await res.json();
     if (!data.elements || data.elements.length === 0){
       document.getElementById('mapStatus').textContent = `No ${type} found within 20km of your location.`;
       return;
@@ -224,7 +246,7 @@ async function loadNearby(type){
     });
     document.getElementById('mapStatus').textContent = `Found ${data.elements.length} ${type} within 20km — showing nearest ${withDist.length}.`;
   } catch (err){
-    document.getElementById('mapStatus').textContent = 'Could not reach Overpass API — it can be slow or briefly unavailable under load. Try again in a moment.';
+    document.getElementById('mapStatus').textContent = 'Got a response but could not process it: ' + err.message;
   }
 }
 
