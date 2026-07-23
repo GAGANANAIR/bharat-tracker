@@ -85,26 +85,23 @@
   </section>
 
 <!-- ===================== TRAIN STATUS TAB ===================== -->
+<!-- ===================== TRAIN STATUS TAB ===================== -->
 <section id="tab-train" class="panel hidden">
   <div class="train-form">
     <input type="text" id="pnrInput" placeholder="Enter 10-digit PNR number" maxlength="10">
-    <button id="pnrBtn">Check PNR Status →</button>
+    <button id="pnrBtn">Check PNR Status</button>
   </div>
   
   <div class="train-form">
     <input type="text" id="trainInput" placeholder="Enter train number (e.g. 12951)" maxlength="5">
-    <button id="trainBtn">Check Running Status →</button>
+    <button id="trainBtn">Check Running Status</button>
   </div>
+
+  <div id="trainResult" style="margin: 20px 0; padding: 15px; background:#f0f8f0; border-radius:8px; display:none;"></div>
 
   <div class="note">
-    <b>Good news:</b> Your PNR or Train number will be **automatically filled** on the official site when you click the button. 
-    No need to type it again!
-  </div>
-
-  <div class="official-links">
-    <a href="https://www.indianrail.gov.in/enquiry/PNR/PnrEnquiry.html" target="_blank">Official PNR Enquiry</a>
-    <a href="https://enquiry.indianrail.gov.in/ntes/" target="_blank">Official Running Status (NTES)</a>
-    <a href="https://www.irctc.co.in" target="_blank">IRCTC Booking</a>
+    <b>Unofficial Checker:</b> Shows passenger names & status inside the app when possible. 
+    May not always work — falls back to official site.
   </div>
 </section>
 
