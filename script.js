@@ -75,7 +75,7 @@ const fuelResult = document.getElementById('fuelResult');
 // === PNR CHECKER ===
 async function checkPNR(pnr) {
   trainResult.style.display = 'block';
-  trainResult.innerHTML = '<p style="color:#0066cc;">Fetching PNR details... Please wait.</p>';
+  trainResult.innerHTML = '<p style="color:#0066cc;">Checking PNR with RapidAPI...</p>';
 
   try {
     const response = await fetch(`https://irctc1.p.rapidapi.com/api/v3/getPNR?pnrNumber=${pnr}`, {
@@ -86,31 +86,34 @@ async function checkPNR(pnr) {
       }
     });
 
-    if (!response.ok) throw new Error('API Error');
-
     const data = await response.json();
-    let html = `<h3>PNR: ${pnr}</h3>`;
 
-    if (data.data) {
+    if (data && data.data) {
       const d = data.data;
+      let html = `<h3>PNR: ${pnr}</h3>`;
       html += `<p><strong>Train:</strong> ${d.trainName || d.trainNo || 'N/A'}</p>`;
       html += `<p><strong>DoJ:</strong> ${d.doj || 'N/A'}</p>`;
-      html += `<p><strong>Chart:</strong> ${d.chartPrepared ? '✅ Prepared' : 'Not Prepared'}</p>`;
+      html += `<p><strong>Chart Status:</strong> ${d.chartPrepared ? '✅ Prepared' : 'Not Prepared'}</p>`;
 
-      if (d.passengerInfo) {
+      if (d.passengerInfo && d.passengerInfo.length > 0) {
         html += '<h4>Passengers:</h4><ul>';
         d.passengerInfo.forEach((p, i) => {
-          html += `<li>Passenger ${i+1}: ${p.currentStatus || p.bookingStatus}</li>`;
+          html += `<li>Passenger ${i+1}: ${p.currentStatus || p.bookingStatus || 'N/A'}</li>`;
         });
         html += '</ul>';
       }
+      trainResult.innerHTML = html;
     } else {
-      html += '<p>No data returned.</p>';
+      throw new Error('No data');
     }
-    trainResult.innerHTML = html;
   } catch (err) {
-    trainResult.innerHTML = `<p style="color:#d32f2f;">Live data not available now.</p>
-      <button onclick="window.open('https://www.indianrail.gov.in/enquiry/PNR/PnrEnquiry.html?pnr=${pnr}', '_blank')">Open Official Site</button>`;
+    trainResult.innerHTML = `
+      <p style="color:#d32f2f;">Live PNR data not available right now (API limit or temporary issue).</p>
+      <p><strong>Your PNR is ready. Click below to see full details:</strong></p>
+      <button onclick="window.open('https://www.indianrail.gov.in/enquiry/PNR/PnrEnquiry.html?pnr=${pnr}', '_blank')" style="padding:10px 20px; background:#0066cc; color:white; border:none; border-radius:6px; cursor:pointer;">
+        Open Official PNR Page →
+      </button>
+    `;
   }
 }
 
