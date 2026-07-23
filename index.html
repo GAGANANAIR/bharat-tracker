@@ -4,15 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bharat Tracker — Schemes, Prices & Train Status</title>
-<meta name="description" content="Search Indian government schemes, check live gold & silver prices, find nearby fuel stations/hospitals/railway stations on a map, and look up train status — all in one place.">
-<link rel="icon" href="favicon.svg" type="image/svg+xml">
-<meta property="og:title" content="Bharat Tracker — Schemes, Prices, Nearby Map & Train Status">
-<meta property="og:description" content="Search Indian government schemes, check live gold & silver prices, and find nearby fuel/hospitals/stations on a map.">
-<meta property="og:image" content="preview.png">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary_large_image">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<meta name="description" content="Search Indian government schemes, check live gold & silver prices, and look up train status — all in one place.">
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 </head>
@@ -84,26 +76,27 @@
     <div id="fuelResult" style="margin-top:12px; font-size:13.5px; color:#555;"></div>
   </section>
 
-<!-- ===================== TRAIN STATUS TAB ===================== -->
-<!-- ===================== TRAIN STATUS TAB ===================== -->
-<section id="tab-train" class="panel hidden">
-  <div class="train-form">
-    <input type="text" id="pnrInput" placeholder="Enter 10-digit PNR number" maxlength="10">
-    <button id="pnrBtn">Check PNR Status</button>
-  </div>
-  
-  <div class="train-form">
-    <input type="text" id="trainInput" placeholder="Enter train number (e.g. 12951)" maxlength="5">
-    <button id="trainBtn">Check Running Status</button>
-  </div>
-
-  <div id="trainResult" style="margin: 20px 0; padding: 15px; background:#f0f8f0; border-radius:8px; display:none;"></div>
-
-  <div class="note">
-    <b>Unofficial Checker:</b> Shows passenger names & status inside the app when possible. 
-    May not always work — falls back to official site.
-  </div>
-</section>
+  <!-- ===================== TRAIN STATUS TAB ===================== -->
+  <section id="tab-train" class="panel hidden">
+    <div class="train-form">
+      <input type="text" id="pnrInput" placeholder="Enter 10-digit PNR number">
+      <button id="pnrBtn">Check PNR</button>
+    </div>
+    <div class="train-form">
+      <input type="text" id="trainInput" placeholder="Enter train number (e.g. 12951)">
+      <button id="trainBtn">Check Running Status</button>
+    </div>
+    <div class="note">
+      <b>Why this opens an official site:</b> Indian Railways doesn't provide a free public API for PNR or live running status —
+      every reliable option requires a paid or registered key. Rather than show you unverified third-party data, checking here
+      takes you straight to the official government lookup tools with your number pre-filled.
+    </div>
+    <div class="official-links">
+      <a href="https://www.indianrail.gov.in/enquiry/PNR/PnrEnquiry.html" target="_blank">Official PNR Enquiry (IR)</a>
+      <a href="https://enquiry.indianrail.gov.in/ntes/" target="_blank">Official Running Status (NTES)</a>
+      <a href="https://www.irctc.co.in" target="_blank">IRCTC Booking</a>
+    </div>
+  </section>
 
   <!-- ===================== NEARBY MAP TAB ===================== -->
   <section id="tab-map" class="panel hidden">
