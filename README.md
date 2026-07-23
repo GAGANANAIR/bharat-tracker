@@ -1,8 +1,8 @@
 # Bharat Tracker
 
-A single-page site tracking things useful for everyday life in India: government schemes, live gold/silver prices, and train status lookup.
+A single-page site tracking things useful for everyday life in India: government schemes, live gold/silver prices, a nearby-places map, and train status lookup.
 
-**[View it live](https://gagananair.github.io/bharat-tracker/)** *(enable GitHub Pages in repo settings to activate)*
+**[View it live](https://gagananair.github.io/bharat-tracker/)**
 
 ## What's in it
 
@@ -19,6 +19,13 @@ Fuel prices are **not** included as live data, because no free, keyless public A
 
 ### 🚆 Train Status
 No reliable free public API exists for Indian Railways PNR/running status either — the ones that exist are paid or require registered keys, and unofficial scrapers are unreliable and can break without notice. Rather than show fake or unverified data, this section validates your PNR/train number format and takes you straight to the **official government lookup tools** with a clean, no-nonsense flow.
+
+### 🗺️ Nearby Map
+Shows fuel stations, hospitals, or railway stations within **20km** of your location, plotted on a real map, sorted nearest-first:
+- **Map tiles:** OpenStreetMap — free, no API key
+- **Place data:** [Overpass API](https://overpass-api.de) — free, no API key, queried live from your browser
+- Your location comes from the browser's own Geolocation API (with your permission) and is only sent to Overpass to run the nearby search — never stored or sent anywhere else
+- Falls back through 3 different Overpass mirror servers if the main one is briefly overloaded, and includes a short cooldown between filter switches to stay within Overpass's rate limits
 
 ## Why some things link out instead of showing live data in-app
 
