@@ -1,6 +1,4 @@
-// Curated database of major Indian government schemes.
-// Info is for general reference only — always verify current eligibility,
-// deadlines, and amounts on the official scheme website before applying.
+
 const SCHEMES = [
   {
     name: "PM-KISAN (Pradhan Mantri Kisan Samman Nidhi)",
