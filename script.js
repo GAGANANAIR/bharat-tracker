@@ -5,7 +5,8 @@ const tabBtns = document.querySelectorAll('.tab-btn');
 const panels = {
   schemes: document.getElementById('tab-schemes'),
   prices: document.getElementById('tab-prices'),
-  train: document.getElementById('tab-train')
+  train: document.getElementById('tab-train'),
+  map: document.getElementById('tab-map')
 };
 tabBtns.forEach(btn => {
   btn.addEventListener('click', () => {
@@ -151,4 +152,95 @@ document.getElementById('trainBtn').addEventListener('click', () => {
     return;
   }
   window.open('https://enquiry.indianrail.gov.in/ntes/', '_blank');
+});
+
+// ---------------------------------------------------------------------
+// Nearby Map: Leaflet + OpenStreetMap tiles (free) + Overpass API (free,
+// no key) for fuel stations, hospitals, and railway stations near the
+// user's browser-reported location.
+// ---------------------------------------------------------------------
+let leafletMap = null;
+let mapMarkers = [];
+let userLat = 20.5937, userLon = 78.9629; // fallback: center of India
+let currentMapType = 'fuel';
+let mapInitialized = false;
+
+const OVERPASS_QUERY = {
+  fuel: 'node["amenity"="fuel"]',
+  hospital: 'node["amenity"="hospital"]',
+  railway: 'node["railway"="station"]'
+};
+
+function initMap(){
+  if (mapInitialized) return;
+  mapInitialized = true;
+  leafletMap = L.map('mapContainer').setView([userLat, userLon], 13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors',
+    maxZoom: 19
+  }).addTo(leafletMap);
+
+  L.marker([userLat, userLon]).addTo(leafletMap).bindPopup('You are here (approx.)');
+  loadNearby(currentMapType);
+}
+
+async function loadNearby(type){
+  document.getElementById('mapStatus').textContent = `Searching for nearby ${type === 'fuel' ? 'fuel stations' : type === 'hospital' ? 'hospitals' : 'railway stations'}…`;
+  mapMarkers.forEach(m => leafletMap.removeLayer(m));
+  mapMarkers = [];
+
+  const query = `[out:json][timeout:25];${OVERPASS_QUERY[type]}(around:4000,${userLat},${userLon});out body 40;`;
+  try {
+    const res = await fetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST',
+      body: query
+    });
+    const data = await res.json();
+    if (!data.elements || data.elements.length === 0){
+      document.getElementById('mapStatus').textContent = `No ${type} found within ~4km. Try zooming/panning the map, or check back later.`;
+      return;
+    }
+    data.elements.forEach(el => {
+      if (el.lat === undefined) return;
+      const name = (el.tags && el.tags.name) ? el.tags.name : (type === 'fuel' ? 'Fuel station' : type === 'hospital' ? 'Hospital' : 'Railway station');
+      const marker = L.marker([el.lat, el.lon]).addTo(leafletMap).bindPopup(name);
+      mapMarkers.push(marker);
+    });
+    document.getElementById('mapStatus').textContent = `Found ${data.elements.length} ${type} nearby.`;
+  } catch (err){
+    document.getElementById('mapStatus').textContent = 'Could not reach Overpass API — it can be slow or briefly unavailable under load. Try again in a moment.';
+  }
+}
+
+document.querySelectorAll('.map-filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.map-filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentMapType = btn.dataset.type;
+    if (leafletMap) loadNearby(currentMapType);
+  });
+});
+
+// Hook into tab switching: initialize the map the first time its tab is opened
+document.querySelector('[data-tab="map"]').addEventListener('click', () => {
+  if (!mapInitialized){
+    if (navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          userLat = pos.coords.latitude;
+          userLon = pos.coords.longitude;
+          initMap();
+        },
+        () => {
+          document.getElementById('mapStatus').textContent = 'Location permission denied — showing central India instead. Allow location access for accurate nearby results.';
+          initMap();
+        },
+        { timeout: 8000 }
+      );
+    } else {
+      initMap();
+    }
+  } else {
+    setTimeout(() => leafletMap.invalidateSize(), 50);
+  }
 });
