@@ -174,7 +174,7 @@ const OVERPASS_QUERY = {
 function initMap(){
   if (mapInitialized) return;
   mapInitialized = true;
-  leafletMap = L.map('mapContainer').setView([userLat, userLon], 13);
+  leafletMap = L.map('mapContainer').setView([userLat, userLon], 11);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors',
     maxZoom: 19
@@ -184,12 +184,20 @@ function initMap(){
   loadNearby(currentMapType);
 }
 
+function haversineKm(lat1, lon1, lat2, lon2){
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180) * Math.cos(lat2*Math.PI/180) * Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
 async function loadNearby(type){
-  document.getElementById('mapStatus').textContent = `Searching for nearby ${type === 'fuel' ? 'fuel stations' : type === 'hospital' ? 'hospitals' : 'railway stations'}…`;
+  document.getElementById('mapStatus').textContent = `Searching within 20km for ${type === 'fuel' ? 'fuel stations' : type === 'hospital' ? 'hospitals' : 'railway stations'}…`;
   mapMarkers.forEach(m => leafletMap.removeLayer(m));
   mapMarkers = [];
 
-  const query = `[out:json][timeout:25];${OVERPASS_QUERY[type]}(around:4000,${userLat},${userLon});out body 40;`;
+  const query = `[out:json][timeout:25];${OVERPASS_QUERY[type]}(around:20000,${userLat},${userLon});out body 300;`;
   try {
     const res = await fetch('https://overpass-api.de/api/interpreter', {
       method: 'POST',
@@ -197,16 +205,24 @@ async function loadNearby(type){
     });
     const data = await res.json();
     if (!data.elements || data.elements.length === 0){
-      document.getElementById('mapStatus').textContent = `No ${type} found within ~4km. Try zooming/panning the map, or check back later.`;
+      document.getElementById('mapStatus').textContent = `No ${type} found within 20km of your location.`;
       return;
     }
-    data.elements.forEach(el => {
-      if (el.lat === undefined) return;
+
+    // Sort by actual distance from the user, closest first, and cap the
+    // markers shown so the map stays readable.
+    const withDist = data.elements
+      .filter(el => el.lat !== undefined)
+      .map(el => ({ el, dist: haversineKm(userLat, userLon, el.lat, el.lon) }))
+      .sort((a, b) => a.dist - b.dist)
+      .slice(0, 60);
+
+    withDist.forEach(({ el, dist }) => {
       const name = (el.tags && el.tags.name) ? el.tags.name : (type === 'fuel' ? 'Fuel station' : type === 'hospital' ? 'Hospital' : 'Railway station');
-      const marker = L.marker([el.lat, el.lon]).addTo(leafletMap).bindPopup(name);
+      const marker = L.marker([el.lat, el.lon]).addTo(leafletMap).bindPopup(`${name}<br>${dist.toFixed(1)} km away`);
       mapMarkers.push(marker);
     });
-    document.getElementById('mapStatus').textContent = `Found ${data.elements.length} ${type} nearby.`;
+    document.getElementById('mapStatus').textContent = `Found ${data.elements.length} ${type} within 20km — showing nearest ${withDist.length}.`;
   } catch (err){
     document.getElementById('mapStatus').textContent = 'Could not reach Overpass API — it can be slow or briefly unavailable under load. Try again in a moment.';
   }
@@ -231,13 +247,18 @@ document.querySelector('[data-tab="map"]').addEventListener('click', () => {
           userLon = pos.coords.longitude;
           initMap();
         },
-        () => {
-          document.getElementById('mapStatus').textContent = 'Location permission denied — showing central India instead. Allow location access for accurate nearby results.';
+        (err) => {
+          let reason = 'Location unavailable.';
+          if (err.code === 1) reason = 'Location permission was denied.';
+          else if (err.code === 2) reason = 'Your device could not determine a location.';
+          else if (err.code === 3) reason = 'Location request timed out.';
+          document.getElementById('mapStatus').textContent = reason + ' Showing central India instead — check your browser/OS location permissions for this site and reload to try again.';
           initMap();
         },
-        { timeout: 8000 }
+        { timeout: 10000, enableHighAccuracy: true }
       );
     } else {
+      document.getElementById('mapStatus').textContent = 'Your browser does not support geolocation. Showing central India instead.';
       initMap();
     }
   } else {
