@@ -84,27 +84,29 @@
     <div id="fuelResult" style="margin-top:12px; font-size:13.5px; color:#555;"></div>
   </section>
 
-  <!-- ===================== TRAIN STATUS TAB ===================== -->
-  <section id="tab-train" class="panel hidden">
-    <div class="train-form">
-      <input type="text" id="pnrInput" placeholder="Enter 10-digit PNR number">
-      <button id="pnrBtn">Check PNR</button>
-    </div>
-    <div class="train-form">
-      <input type="text" id="trainInput" placeholder="Enter train number (e.g. 12951)">
-      <button id="trainBtn">Check Running Status</button>
-    </div>
-    <div class="note">
-      <b>Why this opens an official site:</b> Indian Railways doesn't provide a free public API for PNR or live running status —
-      every reliable option requires a paid or registered key. Rather than show you unverified third-party data, checking here
-      takes you straight to the official government lookup tools with your number pre-filled.
-    </div>
-    <div class="official-links">
-      <a href="https://www.indianrail.gov.in/enquiry/PNR/PnrEnquiry.html" target="_blank">Official PNR Enquiry (IR)</a>
-      <a href="https://enquiry.indianrail.gov.in/ntes/" target="_blank">Official Running Status (NTES)</a>
-      <a href="https://www.irctc.co.in" target="_blank">IRCTC Booking</a>
-    </div>
-  </section>
+<!-- ===================== TRAIN STATUS TAB ===================== -->
+<section id="tab-train" class="panel hidden">
+  <div class="train-form">
+    <input type="text" id="pnrInput" placeholder="Enter 10-digit PNR number" maxlength="10">
+    <button id="pnrBtn">Check PNR Status →</button>
+  </div>
+  
+  <div class="train-form">
+    <input type="text" id="trainInput" placeholder="Enter train number (e.g. 12951)" maxlength="5">
+    <button id="trainBtn">Check Running Status →</button>
+  </div>
+
+  <div class="note">
+    <b>Good news:</b> Your PNR or Train number will be **automatically filled** on the official site when you click the button. 
+    No need to type it again!
+  </div>
+
+  <div class="official-links">
+    <a href="https://www.indianrail.gov.in/enquiry/PNR/PnrEnquiry.html" target="_blank">Official PNR Enquiry</a>
+    <a href="https://enquiry.indianrail.gov.in/ntes/" target="_blank">Official Running Status (NTES)</a>
+    <a href="https://www.irctc.co.in" target="_blank">IRCTC Booking</a>
+  </div>
+</section>
 
   <!-- ===================== NEARBY MAP TAB ===================== -->
   <section id="tab-map" class="panel hidden">
