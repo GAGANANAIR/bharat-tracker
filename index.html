@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bharat Tracker — Schemes, Prices & Train Status</title>
+<meta name="description" content="Search Indian government schemes, check live gold & silver prices, and look up train status — all in one place.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div>
+      <h1>🇮🇳 Bharat Tracker</h1>
+      <div class="tag">Schemes · Live Prices · Train Status</div>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <button class="tab-btn active" data-tab="schemes">Govt Schemes</button>
+  <button class="tab-btn" data-tab="prices">Live Prices</button>
+  <button class="tab-btn" data-tab="train">Train Status</button>
+</nav>
+
+<main>
+
+  <!-- ===================== SCHEMES TAB ===================== -->
+  <section id="tab-schemes" class="panel">
+    <div class="search-row">
+      <input type="text" id="schemeSearch" placeholder="Search schemes (e.g. farmer, health, housing)…">
+      <select id="schemeCategory">
+        <option value="">All Categories</option>
+      </select>
+    </div>
+    <div id="schemeResults"></div>
+    <div class="note">
+      <b>Note:</b> This is a curated reference list. Eligibility criteria, benefit amounts, and application steps can change —
+      always confirm current details on the official scheme website (linked on each card) before applying.
+    </div>
+  </section>
+
+  <!-- ===================== LIVE PRICES TAB ===================== -->
+  <section id="tab-prices" class="panel hidden">
+    <div class="price-grid">
+      <div class="price-card loading" id="goldCard">
+        <div class="label">Gold (24K, per 10g)</div>
+        <div class="value" id="goldValue">Loading…</div>
+        <div class="sub" id="goldSub">&nbsp;</div>
+      </div>
+      <div class="price-card loading" id="silverCard">
+        <div class="label">Silver (per kg)</div>
+        <div class="value" id="silverValue">Loading…</div>
+        <div class="sub" id="silverSub">&nbsp;</div>
+      </div>
+    </div>
+    <div class="note">
+      <b>Live data:</b> Gold & Silver spot rates come from <a href="https://gold-api.com" target="_blank">gold-api.com</a>
+      (free, no API key), converted to INR using <a href="https://www.exchangerate-api.com" target="_blank">open.er-api.com</a>
+      live USD→INR rates. These are international spot prices converted to INR — actual jeweller rates in India include making charges, GST, and local premiums, so treat this as a reference rate, not a shop quote.
+    </div>
+
+    <h3 style="margin-top:24px; font-size:15px;">Fuel Prices (Petrol/Diesel)</h3>
+    <div class="note">
+      There's no free, keyless public API for real-time Indian fuel prices — every source (government or third-party) requires
+      a registered API key. If you have a free <a href="https://data.gov.in" target="_blank">data.gov.in</a> API key, paste it
+      below and this section will start pulling live city-wise fuel prices.
+    </div>
+    <div class="key-row">
+      <input type="text" id="fuelApiKey" placeholder="Paste your data.gov.in API key here (optional)">
+      <button id="fuelKeySave">Save</button>
+    </div>
+    <div id="fuelResult" style="margin-top:12px; font-size:13.5px; color:#555;"></div>
+  </section>
+
+  <!-- ===================== TRAIN STATUS TAB ===================== -->
+  <section id="tab-train" class="panel hidden">
+    <div class="train-form">
+      <input type="text" id="pnrInput" placeholder="Enter 10-digit PNR number">
+      <button id="pnrBtn">Check PNR</button>
+    </div>
+    <div class="train-form">
+      <input type="text" id="trainInput" placeholder="Enter train number (e.g. 12951)">
+      <button id="trainBtn">Check Running Status</button>
+    </div>
+    <div class="note">
+      <b>Why this opens an official site:</b> Indian Railways doesn't provide a free public API for PNR or live running status —
+      every reliable option requires a paid or registered key. Rather than show you unverified third-party data, checking here
+      takes you straight to the official government lookup tools with your number pre-filled.
+    </div>
+    <div class="official-links">
+      <a href="https://www.indianrail.gov.in/enquiry/PNR/PnrEnquiry.html" target="_blank">Official PNR Enquiry (IR)</a>
+      <a href="https://enquiry.indianrail.gov.in/ntes/" target="_blank">Official Running Status (NTES)</a>
+      <a href="https://www.irctc.co.in" target="_blank">IRCTC Booking</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Built by <a href="https://gagagananair.netlify.app/" target="_blank">Gagan A Nair</a> ·
+  <a href="https://github.com/GAGANANAIR/bharat-tracker" target="_blank">Source on GitHub</a>
+</footer>
+
+<script src="schemes.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
