@@ -108,4 +108,5 @@ footer a{ color: var(--navy); }
   border:1px solid var(--line); background:#f3f3ee; color:#444; cursor:pointer;
 }
 .map-filter-btn.active{ background: var(--navy); color:#fff; border-color: var(--navy); }
+.map-filter-btn:disabled{ opacity:0.5; cursor:not-allowed; }
 #mapContainer{ z-index:0; }
