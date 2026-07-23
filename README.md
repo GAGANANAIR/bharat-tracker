@@ -6,10 +6,10 @@ A single-page site tracking things useful for everyday life in India: government
 
 ## What's in it
 
-### 🏛️ Government Schemes
+### Government Schemes
 A searchable, filterable directory of 15 major central government schemes (PM-KISAN, Ayushman Bharat, PMAY, Ujjwala Yojana, Mudra loans, and more) — who's eligible, what the benefit is, and how to apply, each linking to the official page.
 
-### 💰 Live Prices
+### Live Prices
 Real-time gold and silver spot prices, converted to INR:
 - **Data source:** [gold-api.com](https://gold-api.com) — genuinely free, no API key required, CORS-enabled
 - **Currency conversion:** [open.er-api.com](https://www.exchangerate-api.com) — free, no key required
@@ -17,10 +17,10 @@ Real-time gold and silver spot prices, converted to INR:
 
 Fuel prices are **not** included as live data, because no free, keyless public API for Indian fuel prices exists — every source (government or third-party) requires registration. The page has a spot to paste your own free [data.gov.in](https://data.gov.in) API key if you want to wire this up further.
 
-### 🚆 Train Status
+### Train Status
 No reliable free public API exists for Indian Railways PNR/running status either — the ones that exist are paid or require registered keys, and unofficial scrapers are unreliable and can break without notice. Rather than show fake or unverified data, this section validates your PNR/train number format and takes you straight to the **official government lookup tools** with a clean, no-nonsense flow.
 
-### 🗺️ Nearby Map
+### Nearby Map
 Shows fuel stations, hospitals, or railway stations within **20km** of your location, plotted on a real map, sorted nearest-first:
 - **Map tiles:** OpenStreetMap — free, no API key
 - **Place data:** [Overpass API](https://overpass-api.de) — free, no API key, queried live from your browser
