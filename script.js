@@ -116,26 +116,64 @@ document.getElementById('fuelKeySave').addEventListener('click', () => {
   fuelResult.textContent = 'Key saved in this browser. (Wire up the specific data.gov.in resource ID for your state/city to complete this integration — the free key alone doesn\'t pick the endpoint for you.)';
 });
 
-// === TRAIN STATUS (Improved) ===
-document.getElementById('pnrBtn').addEventListener('click', () => {
-  const pnr = document.getElementById('pnrInput').value.trim();
-  if (!/^\d{10}$/.test(pnr)) {
-    alert('Please enter a valid 10-digit PNR number.');
-    return;
-  }
-  // Pre-fills PNR on official site
-  window.open(`https://www.indianrail.gov.in/enquiry/PNR/PnrEnquiry.html?pnr=${pnr}`, '_blank');
-});
+// === TRAIN STATUS with YOUR RapidAPI Key ===
+const trainResult = document.getElementById('trainResult');
 
-// === TRAIN STATUS (Improved) ===
+async function checkPNR(pnr) {
+  trainResult.style.display = 'block';
+  trainResult.innerHTML = '<p style="color:#0066cc;">Fetching PNR details... Please wait.</p>';
+
+  try {
+    const response = await fetch(`https://irctc1.p.rapidapi.com/api/v3/getPNR?pnrNumber=${pnr}`, {
+      method: 'GET',
+      headers: {
+        'x-rapidapi-host': 'irctc1.p.rapidapi.com',
+        'x-rapidapi-key': '31f5e7752amsh62837c45a6eaf9bp19ce77jsnd063cd71a424'
+      }
+    });
+
+    if (!response.ok) throw new Error('API Error');
+
+    const data = await response.json();
+
+    let html = `<h3>PNR: ${pnr}</h3>`;
+
+    if (data.data) {
+      const d = data.data;
+      html += `<p><strong>Train:</strong> ${d.trainName || d.trainNo || 'N/A'} (${d.from || ''} → ${d.to || ''})</p>`;
+      html += `<p><strong>Date of Journey:</strong> ${d.doj || 'N/A'}</p>`;
+      html += `<p><strong>Chart Status:</strong> ${d.chartPrepared ? '✅ Prepared' : 'Not Prepared'}</p>`;
+
+      if (d.passengerInfo && d.passengerInfo.length > 0) {
+        html += '<h4>Passengers:</h4><ul>';
+        d.passengerInfo.forEach((p, i) => {
+          html += `<li>Passenger ${i+1}: ${p.currentStatus || p.bookingStatus || 'N/A'}</li>`;
+        });
+        html += '</ul>';
+      }
+    } else {
+      html += '<p>No detailed data returned.</p>';
+    }
+
+    trainResult.innerHTML = html;
+  } catch (err) {
+    trainResult.innerHTML = `
+      <p style="color:#d32f2f;">Could not fetch live data right now.</p>
+      <button onclick="window.open('https://www.indianrail.gov.in/enquiry/PNR/PnrEnquiry.html?pnr=${pnr}', '_blank')">
+        Open Official Site →
+      </button>
+    `;
+  }
+}
+
+// Button Click Handlers
 document.getElementById('pnrBtn').addEventListener('click', () => {
   const pnr = document.getElementById('pnrInput').value.trim();
   if (!/^\d{10}$/.test(pnr)) {
     alert('Please enter a valid 10-digit PNR number.');
     return;
   }
-  // Pre-fills PNR on official site
-  window.open(`https://www.indianrail.gov.in/enquiry/PNR/PnrEnquiry.html?pnr=${pnr}`, '_blank');
+  checkPNR(pnr);
 });
 
 document.getElementById('trainBtn').addEventListener('click', () => {
