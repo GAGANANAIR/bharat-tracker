@@ -102,3 +102,10 @@ main{ max-width: 960px; margin: 0 auto; padding: 0 12px 40px; }
 
 footer{ text-align:center; padding: 20px 12px 30px; color: var(--muted); font-size: 12.5px; }
 footer a{ color: var(--navy); }
+
+.map-filter-btn{
+  font-family:inherit; font-size:13px; font-weight:600; padding:8px 14px; border-radius:6px;
+  border:1px solid var(--line); background:#f3f3ee; color:#444; cursor:pointer;
+}
+.map-filter-btn.active{ background: var(--navy); color:#fff; border-color: var(--navy); }
+#mapContainer{ z-index:0; }
