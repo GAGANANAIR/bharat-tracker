@@ -1,3 +1,14 @@
+<p align="center">
+  <img src="preview.png" alt="Bharat Tracker" width="100%"/>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/license-MIT-green" alt="MIT License"/>
+  <img src="https://img.shields.io/badge/data-live%20gold%2Fsilver%20prices-8b5cf6" alt="Live prices"/>
+  <img src="https://img.shields.io/badge/map-OpenStreetMap-1a73e8" alt="OpenStreetMap"/>
+  <img src="https://img.shields.io/badge/no%20build%20step-vanilla%20JS-ec4899" alt="Vanilla JS"/>
+</p>
+
 # Bharat Tracker
 
 A single-page site tracking things useful for everyday life in India: government schemes, live gold/silver prices, a nearby-places map, and train status lookup.
