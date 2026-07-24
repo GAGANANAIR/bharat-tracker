@@ -1,0 +1,8 @@
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local env/secrets, if any get added later
+.env
